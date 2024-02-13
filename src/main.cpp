@@ -1,12 +1,20 @@
 #include <esp_now.h>
 #include <WiFi.h>
 
+#include <ArduinoJson.h>
+#include "Ticker.h"
+#include <ESP32Encoder.h>
+
+
+
+
 /* 
  REPLACE WITH MOTION CONTROLLER MAC Address.
  The serial console prints "WiFi MAC: XX:XX:XX:XX:XX:XX" on startup
 */
 
-uint8_t remotePeerAddress[] = {0xC8, 0x2B, 0x96, 0xA6, 0xED, 0xA4}; // TODO: Implement broadcast with security
+// 24:D7:EB:B7:A7:2C
+uint8_t remotePeerAddress[] = {0x24, 0xD7, 0xEB, 0xB7, 0xA7, 0x2C}; // TODO: Implement broadcast with security
 
 
 typedef struct espnow_add_peer_msg {
@@ -21,6 +29,16 @@ typedef struct espnow_message {
   float c;
   bool d;
 } espnow_message;
+
+typedef struct espnow_message_mpg {
+  char a[32];
+  int b;
+  float c;
+  bool d;
+  int mpg1;
+} espnow_message_mpg;
+
+espnow_message_mpg mpgData;
 
 // Feedback packet (with max 6 axis) that is sent from motion controller
 struct fbPacket {
@@ -127,7 +145,38 @@ void loop_Core0_EspNowSenderTask(void* parameter)
     vTaskDelete(NULL);
 }
 
+// Encoder stuff
+
+Ticker sendTimer;
+Ticker encoderTimer;
+
+ESP32Encoder encoder;
+int lastCnt = 0;
+
+void sendMPG(){
+  esp_err_t result = esp_now_send(remotePeerAddress, (uint8_t*) &mpgData, sizeof(mpgData));
+  if (result != ESP_OK) {
+    Serial.println("ERROR: Could not send MPG update...");
+    espnow_peer_configured = false;
+  }
+}
+
+void checkEncoder(){
+  int cnt = encoder.getCount();
+  if(cnt != lastCnt){
+    Serial.printf("\n\t %i \n",cnt);
+    lastCnt = cnt;
+    // TODO, fix this, cast 64 bit int to 32
+    mpgData.mpg1 = (int)encoder.getCount();
+    sendMPG();
+  }
+}
+
 void setup() {
+  // setup encoder
+  ESP32Encoder::useInternalWeakPullResistors = puType::UP;
+  encoder.attachHalfQuad(32, 25);
+  encoderTimer.attach_ms(10,checkEncoder);
 
   Serial.begin(115200);
   Serial.println("Starting up...");
