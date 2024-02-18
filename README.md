@@ -1,10 +1,10 @@
-
+## Deprecated
 This repo is no longer maintained. The ESP-NOW "Client" feature is included in the main Controller repo below.<br>
 See the Serial Commands documentation on how to change the mode `mode client` at runtime.<br>
 The client mode codebase is located in ``ClientMode.cpp``<br>
 <https://github.com/wezhunter/ESP32_LinuxCNC_MotionController_RealTime>
 <br>
-------
+
 
 # ESP32 Wireless Client (ESP-NOW) for ESP32 LinuxCNC Ethernet Motion Controller
 Connects to the ESP32 Motion Controller for LinuxCNC via a low-latency point-to-point wireless link (ESP-NOW)
@@ -17,7 +17,7 @@ Connects to the ESP32 Motion Controller for LinuxCNC via a low-latency point-to-
 * Example data struct included which can be sent from this client based on any event (GPIO etc)
 * Motion Controller and LinuxCNC HAL driver can be extended to support wireless client to host control with low latency
 
-## Use Cases / Ideas
+### Use Cases / Ideas
 * Wireless control panel for LinuxCNC
 * LCD/DRO status
 * Custom MPG pendant
